@@ -2,18 +2,26 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameService } from '../../api/services/GameService';
 
-export const ChooseTheme = () => {
+export const ChooseTheme = ({ handleOnStartGame }: { handleOnStartGame: (resp: any) => void }) => {
     const [themeId, setThemeId] = useState<number | null>(null);
     const [levelId, setLevelId] = useState<number | null>(null);
     const navigate = useNavigate();
 
-    const handleStartGame = async () => {
+    const handleStartGame = () => {
         if (themeId && levelId) {
-            const game = await GameService.create({themeId, levelId});
-            if (game) {
-                navigate('/jogar');
-            }
+            GameService.create({ themeId, levelId })
+                .then((resp) => {
+                    if (resp) {
+                        if (resp instanceof Error) {
+                            alert(resp.message)
+                        } else {
+                            handleOnStartGame(resp);
+                            navigate('/jogar');
+                        }
+                    }
+                })
         }
+
     };
 
     return (

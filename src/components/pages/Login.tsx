@@ -77,12 +77,7 @@ export const Login: React.FC<ILoginProps> = ({ children }) => {
             />
           </Box>
         </CardContent>
-        <Avatar 
-        src='./public/naruto/1.png'
-        sx={{
-          backgroundColor: 'error.main',
-          height: 50}}
-          />
+      
         <CardActions>
           <Box width='100%' display='flex' justifyContent='center'>
 

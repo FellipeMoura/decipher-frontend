@@ -4,9 +4,9 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { resetGame, startGame } from '../../redux/game/actions';
+import { resetGame } from '../../redux/game/actions';
 
-export const ActiveGamePrompt = () => {
+export const ActiveGamePrompt = ({ setIsActiveGame }: { setIsActiveGame: (isActiveGame: boolean) => void }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { gameId } = useSelector((state: RootState) => state.game);
@@ -25,6 +25,7 @@ export const ActiveGamePrompt = () => {
                 if (resp) {
                     dispatch(resetGame());
                     navigate('/iniciar-jogo');
+                    setIsActiveGame(false);
                 }else{
                     alert('Erro ao finalizar o jogo')
                 }

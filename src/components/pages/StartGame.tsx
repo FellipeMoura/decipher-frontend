@@ -5,12 +5,15 @@ import { startGame } from '../../redux/game/actions';
 import {ChooseTheme} from './ChooseTheme';
 import {ActiveGamePrompt} from './ActiveGamePrompt';
 import { LoadingState } from '../layouts/StartGameLayout';
+import { IGameResponseDTO } from '../../types/Game';
 
 export const StartGame = () => {
     const dispatch = useDispatch();
     const [isLoading, setIsLoading] = useState(true);
     const [isActiveGame, setIsActiveGame] = useState(false);
-
+    const handleStartGame = (resp: IGameResponseDTO) => {
+        dispatch(startGame(resp));
+    };
   useEffect(() => {
         GameService.getActiveGame()
             .then((resp) => {
@@ -19,14 +22,11 @@ export const StartGame = () => {
                     if (resp instanceof Error) {
                         alert(resp.message)
                     } else {
-                        dispatch(startGame(resp));
-                        setIsActiveGame(true);
-                       
+                        handleStartGame(resp);
+                        setIsActiveGame(true);      
                     }
                 }
-
             })
-
     }, []);
 
     if (isLoading) {
@@ -34,8 +34,8 @@ export const StartGame = () => {
     }
 
     if (isActiveGame) {
-        return <ActiveGamePrompt />;
+        return <ActiveGamePrompt  setIsActiveGame={setIsActiveGame}/>;
     }
 
-    return <ChooseTheme />;
+    return <ChooseTheme handleOnStartGame={handleStartGame} />;
 };
