@@ -9,9 +9,9 @@ export const Navbar: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const navigate = useNavigate();
     return (
 
-        <Box width='100vw' height='100vh' display='flex' alignItems='center' justifyContent='center'>
+        <Box width='100%' height='100%' display='flex' alignItems='center' justifyContent='center'>
 
-            <AppBar >
+            <AppBar sx={{ height: 64 }}>
                 <Toolbar>
                     <Button
                         onClick={() => navigate('/')}
@@ -22,7 +22,7 @@ export const Navbar: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     </Button>
 
                     <Button
-                     onClick={() => navigate('/jogar')}
+                        onClick={() => navigate('/iniciar-jogo')}
                         color='inherit'
                         sx={{ fontSize: 18, flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
                     >

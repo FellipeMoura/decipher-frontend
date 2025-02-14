@@ -1,95 +1,154 @@
-import { useCallback, useEffect, useState } from "react";
-import { StickerService } from "../../api/services/StickerService";
-import { ISticker } from "../../types/Sticker";
+import { useDispatch, useSelector } from 'react-redux';
+import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
+import { ISticker } from '../../types/Sticker';
+import { setStickers, updateSlots, setActiveSticker, resetAttempt } from '../../redux/game/actions';
+import { ActiveStickerOverlay, AvailableField, DraggableSticker, DroppableSlot, GameContainer, SlotsField } from '../layouts/GameLayouts';
+import { RootState } from '../../redux/store';
+import { Button } from '@mui/material';
 
 export const Game = () => {
-  const [stickers, setStickers] = useState<ISticker[]>([]);
-  // Estado para os slots preenchidos – inicialmente, vazio
-  const [slots, setSlots] = useState<(ISticker | null)[]>([null, null, null, null]);
+    const dispatch = useDispatch();
+    const { stickers, slots, activeSticker } = useSelector((state: RootState) => state.game);
 
-  // Carrega os stickers do tema quando o componente é montado
-  useEffect(() => {
-    getStickers();
-  }, []);
+    // Carrega os stickers do tema ao montar o componente
+ 
 
-  const getStickers = useCallback(async () => {
-    const themeId = 1;
-    const result = await StickerService.findByTheme_Id(themeId);
-    setStickers(result instanceof Error ? [] : result);
-  }, []);
+    const handleDragStart = (event: any) => {
+        const { active } = event;
+        const sticker =
+            stickers.find((s: ISticker) => s.id.toString() === active.id) ||
+            slots.find((s: ISticker) => s && s.id.toString() === active.id) ||
+            null;
+        dispatch(setActiveSticker(sticker));
+    };
 
-  // Exemplo de função para "preencher" um slot clicando no sticker (para fins de esboço)
-  const handleStickerClick = (sticker: ISticker) => {
-    // Procura o primeiro slot vazio e preenche com o sticker clicado
-    setSlots((prevSlots) => {
-      const newSlots = [...prevSlots];
-      const emptyIndex = newSlots.findIndex((slot) => slot === null);
-      if (emptyIndex !== -1) {
-        newSlots[emptyIndex] = sticker;
-      }
-      return newSlots;
-    });
-  };
+    const handleDragEnd = (event: any) => {
+        const { active, over } = event;
 
-  // Exemplo de função para remover um sticker de um slot, se desejar
-  const handleSlotClick = (index: number) => {
-    setSlots((prevSlots) => {
-      const newSlots = [...prevSlots];
-      newSlots[index] = null;
-      return newSlots;
-    });
-  };
+        // Se o sticker for solto sobre um slot
+        if (over && over.id.toString().startsWith('slot-')) {
+            const slotIndexEnd = parseInt(over.id.toString().split('-')[1]); // Índice do slot de destino
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-8">
-      {/* Cabeçalho */}
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-800">Jogo de Stickers</h1>
-      </header>
+            // Verifica se o sticker já está em algum slot
+            const isStickerInSlot = slots.some((slot: ISticker | null) => slot?.id === Number(active.id));
 
-      {/* Área do tabuleiro: slots para posicionar os stickers */}
-      <section className="mb-12">
-        <h2 className="text-2xl mb-4">Tabuleiro</h2>
-        <div className="flex space-x-4">
-          {slots.map((slot, index) => (
-            <div
-              key={index}
-              className="w-20 h-20 border-2 border-dashed border-gray-400 rounded-md flex items-center justify-center cursor-pointer bg-white"
-              onClick={() => handleSlotClick(index)}
-            >
-              {slot ? (
-                <img
-                  src={slot.url}
-                  alt={slot.name}
-                  className="max-h-full max-w-full"
-                />
-              ) : (
-                <span className="text-gray-400">Slot {index + 1}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+            if (!isStickerInSlot) {
+                // Se o sticker não está em nenhum slot, move-o para o slot de destino
+                const newSlots = [...slots];
 
-      {/* Área dos stickers disponíveis */}
-      <section className="w-full max-w-3xl">
-        <h2 className="text-2xl mb-4">Stickers Disponíveis</h2>
-        <div className="grid grid-cols-4 gap-4">
-          {stickers.map((sticker) => (
-            <div
-              key={sticker.id}
-              className="w-20 h-20 border border-gray-300 rounded-md flex items-center justify-center cursor-pointer bg-white hover:shadow-lg transition-shadow"
-              onClick={() => handleStickerClick(sticker)}
-            >
-              <img
-                src={sticker.url}
-                alt={sticker.name}
-                className="max-w-full max-h-full"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
+                // Se o slot de destino estiver vazio, move o sticker para ele
+                if (!newSlots[slotIndexEnd] && activeSticker) {
+                    newSlots[slotIndexEnd] = activeSticker;
+                    dispatch(updateSlots(newSlots));
+                    dispatch(setStickers(stickers.filter((s: ISticker) => s.id !== activeSticker.id)));
+                }
+                // Se o slot de destino estiver ocupado, move o sticker para ele e devolve o sticker antigo para a lista de stickers disponíveis
+                else if (activeSticker) {
+                    const newStickers = [...stickers, newSlots[slotIndexEnd]]; // Adiciona o sticker do slot de destino de volta à lista de stickers
+                    newSlots[slotIndexEnd] = activeSticker; // Move o sticker ativo para o slot de destino
+                    dispatch(updateSlots(newSlots));
+                    dispatch(setStickers(newStickers.filter((s: ISticker) => s.id !== activeSticker.id)));
+                }
+            } else {
+                // Se o sticker já está em um slot, troca os valores entre os slots
+                const sourceSlotIndex = slots.findIndex((slot: ISticker | null) => slot?.id === Number(active.id)); // Índice do slot de origem
+                const newSlots = [...slots];
+
+                // Troca os valores dos slots
+                const temp = newSlots[sourceSlotIndex];
+                newSlots[sourceSlotIndex] = newSlots[slotIndexEnd];
+                newSlots[slotIndexEnd] = temp;
+
+                dispatch(updateSlots(newSlots));
+            }
+        }
+        // Se o sticker for solto na área disponível
+        else {
+            const isStickerInAvaliableStickers = stickers.some((s: ISticker | null) => s && s.id === Number(activeSticker.id))
+            if (over && over.id === 'available' && !isStickerInAvaliableStickers) {
+
+                const newSlots = slots.map((slot: ISticker | null) =>
+                    slot && slot.id.toString() === active.id ? null : slot
+                );
+                dispatch(updateSlots(newSlots));
+                if (activeSticker) {
+                    dispatch(setStickers([...stickers, activeSticker]));
+                }
+            }
+        }
+
+        dispatch(setActiveSticker(null));
+    };
+
+   
+
+    const handleSubmitAttempt = () => {
+        // Verifica se a sequência está correta (exemplo: compara com uma sequência fixa)
+        const correctSequence: number[] = [1,2,3,4,5,6,7];
+        const isCorrect = slots.every((slot: ISticker | null, index: number) => slot?.id === correctSequence[index]);
+    
+        if (isCorrect) {
+            alert('Parabéns! Você acertou a sequência!');
+            // Atualiza a pontuação ou avança para o próximo nível
+        } else {
+            alert('Sequência incorreta. Tente novamente!');
+            // Penaliza o usuário (ex: reduz a pontuação)
+        }
+    };
+
+    return (
+        <DndContext
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+    >
+        <GameContainer>
+            {/* Área dos slots */}
+            <SlotsField>
+                {slots.map((slot: ISticker | null, index: number) => (
+                    <DroppableSlot key={index} id={`slot-${index}`}>
+                        {slot ? (
+                            <DraggableSticker sticker={slot} />
+                        ) : (
+                            <span className="text-gray-400">Slot {index + 1}</span>
+                        )}
+                    </DroppableSlot>
+                ))}
+            </SlotsField>
+    
+            {/* Renderização condicional */}
+            {!slots.every((slot: ISticker | null) => slot) ? (
+                // Se todos os slots estiverem preenchidos, exibe a área de stickers disponíveis
+                <AvailableField>
+                    {stickers.map((sticker: ISticker) => (
+                        <DraggableSticker key={sticker.id} sticker={sticker} />
+                    ))}
+                </AvailableField>
+            ) : (
+                // Se algum slot estiver vazio, exibe os botões de ação
+                <div className="flex space-x-4 mt-8">
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={()=>dispatch(resetAttempt())}
+                    >
+                        Limpar Slots
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSubmitAttempt}
+                    >
+                        Fazer Tentativa
+                    </Button>
+                </div>
+            )}
+    
+            {/* Overlay para o sticker sendo arrastado */}
+            <DragOverlay>
+                <ActiveStickerOverlay activeSticker={activeSticker} />
+            </DragOverlay>
+        </GameContainer>
+    </DndContext>
+    );
 };

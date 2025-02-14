@@ -1,4 +1,10 @@
+import { Typography } from "@mui/material"
 
 export const Home = () => {
-    return <h1>Página inicial</h1>
+    return (
+        <Typography variant="h2" gutterBottom>
+            Página inicial
+        </Typography>
+
+    )
 }

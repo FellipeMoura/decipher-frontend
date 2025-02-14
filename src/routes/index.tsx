@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { useDrawerContext } from '../contexts';
-import { Home, Game } from '../components/pages';
+import { Home, Game, StartGame } from '../components/pages';
 
 
 export const AppRoutes = () => {
@@ -26,7 +26,7 @@ export const AppRoutes = () => {
         options: [
           {
             icon: 'games_outlined',
-            path: '/jogar',
+            path: '/iniciar-jogo',
             label: 'Jogar',
           },
         ],
@@ -41,7 +41,7 @@ export const AppRoutes = () => {
 
       <Route path="/" element={<Home />} />
       <Route path="/jogar" element={<Game />} />
-
+      <Route path="/iniciar-jogo" element={<StartGame />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
