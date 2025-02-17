@@ -11,9 +11,9 @@ import { IGame } from "./Game";
 
   export interface ICreateAttemptDto {
     gameId: number;
-    sequenceAttempt: number;
+    sequenceAttempt: string;
     correctCount: number;
-    attemptTime: number;
+    attemptTime: string;
   }
 
   

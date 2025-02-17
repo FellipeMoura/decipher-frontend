@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { GameService } from '../../api/services/GameService';
 
 export const ChooseTheme = ({ handleOnStartGame }: { handleOnStartGame: (resp: any) => void }) => {
-    const [themeId, setThemeId] = useState<number | null>(null);
-    const [levelId, setLevelId] = useState<number | null>(null);
+    const [themeId, setThemeId] = useState<number | null>(1);
+    const [levelId, setLevelId] = useState<number | null>(1);
     const navigate = useNavigate();
 
     const handleStartGame = () => {

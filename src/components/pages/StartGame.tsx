@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { GameService } from '../../api/services/GameService';
 import { startGame } from '../../redux/game/actions';
-import {ChooseTheme} from './ChooseTheme';
-import {ActiveGamePrompt} from './ActiveGamePrompt';
+import {ChooseTheme} from '../startGame/ChooseTheme';
+import {ActiveGamePrompt} from '../startGame/ActiveGamePrompt';
 import { LoadingState } from '../layouts/StartGameLayout';
 import { IGameResponseDTO } from '../../types/Game';
 

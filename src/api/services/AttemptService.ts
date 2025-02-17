@@ -2,6 +2,12 @@
 import { Api } from '../axios-config';
 import { IAttempt, ICreateAttemptDto } from '../../types/Attempt';
 
+
+interface ICreateAttemptResponse {
+    isCorrectSequence: boolean;
+    id: number;
+} 
+
 export const AttemptService = {
   // Retorna uma tentativa pelo id
   getById: async (id: string): Promise<IAttempt | Error> => {
@@ -13,9 +19,11 @@ export const AttemptService = {
     }
   },
   // Cria uma nova tentativa
-  create: async (createAttemptDto: ICreateAttemptDto): Promise<IAttempt | Error> => {
+ 
+  create: async (createAttemptDto: ICreateAttemptDto): Promise< ICreateAttemptResponse | Error> => {
     try {
       const { data } = await Api.post(`/attempt`, createAttemptDto);
+      
       return data;
     } catch (error: any) {
       return new Error(error.message || 'Erro ao criar tentativa.');
