@@ -1,5 +1,4 @@
 import { useSelector } from "react-redux";
-import { IAttempts } from "../../redux/game/types";
 import { RootState } from "../../redux/store";
 import { useEffect, useState } from "react";
 import { ISticker } from "../../types/Sticker";
@@ -14,9 +13,9 @@ export interface IAttemptsWithUrl {
 export const Attempts = () => {
     const { attempts, avaliableStickers } = useSelector((state: RootState) => state.game);
 
-    const [sortedStickers, setSortedStickers] = useState<IAttemptsWithUrl[]>([]);
+    const [sortedAttempts, setSortedAttempts] = useState<IAttemptsWithUrl[]>([]);
 
-    // Atualiza o array sortedStickers sempre que avaliableStickers ou attempts mudarem
+    // Atualiza o array sortedAttempts sempre que avaliableStickers ou attempts mudarem
     useEffect(() => {
         const updatedAttempts = attempts.map((attempt: IAttemptsWithUrl) => {
             // Mapeia a sequência de IDs para os objetos completos de stickers
@@ -27,15 +26,15 @@ export const Attempts = () => {
             return { ...attempt, stickersInSequence }; // Inclui o array completo de stickers na tentativa
         });
 
-        setSortedStickers(updatedAttempts); // Atualiza o estado com as tentativas completas
+        setSortedAttempts(updatedAttempts); // Atualiza o estado com as tentativas completas
     }, [attempts, avaliableStickers]);
    // const getStickersFromSequence = (sequence: number[]): ISticker[] => {
-    //    return sequence.map(id => sortedStickers.find(sticker => sticker.id === id)!);
+    //    return sequence.map(id => sortedAttempts.find(sticker => sticker.id === id)!);
    // };
     return (
-        <div className="w-full max-w-4xl space-y-4">
-            <div className="grid gap-4">
-                {attempts.map((attempt: IAttempts, index: number) => {
+        <div className="w-full max-w-4xl space-y-4 ">
+            <div className="grid gap-4 overflow-auto h-400">
+                {sortedAttempts.map((attempt: IAttemptsWithUrl, index: number) => {
                     // Mapeia a sequência de IDs para objetos completos de stickers
                     //const sequenceStickers = getStickersFromSequence(attempt.sequence);
 
@@ -54,7 +53,7 @@ export const Attempts = () => {
                             </div>
                             {/* Exibe a sequência de stickers */}
                             <div className="flex space-x-2 mt-4">
-                                {sequenceStickers.map((sticker, idx) => (
+                                {attempt.stickersInSequence.map((sticker, idx) => (
                                     <div key={idx} className="w-10 h-10 rounded-md overflow-hidden">
                                         <img
                                             src={sticker.url}

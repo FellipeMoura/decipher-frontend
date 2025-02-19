@@ -10,13 +10,8 @@ export const Game = () => {
   const [activeTab, setActiveTab] = useState('game');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <div className="bg-gradient-to-b from-gray-900 to-gray-800 text-white pt-12 h-screen">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center mb-8 space-x-2">
-          <Crown className="w-8 h-8 text-yellow-400" />
-          <h1 className="text-4xl font-bold text-center">Jogo de Stickers</h1>
-        </div>
-        
         {/* Tabs */}
         <div className="w-full flex flex-col items-center">
           <div className="flex bg-gray-800/50 rounded-lg p-1 border border-gray-700 mb-4">
