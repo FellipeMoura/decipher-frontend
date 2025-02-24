@@ -2,11 +2,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
 import { ISticker } from '../../types/Sticker';
 import { setStickers, updateSlots, setActiveSticker, resetAttempt, insertAttempt, setTimes } from '../../redux/game/actions';
-import { ActiveStickerOverlay, AvailableField, DraggableSticker, DroppableSlot, GameContainer, SlotsField } from '../layouts/GameLayouts';
+import { ActiveStickerOverlay, AvailableField, DraggableSticker, DroppableSlot, FieldContainer, SlotsField } from '../layouts/GameLayouts';
 import { RootState } from '../../redux/store';
-import { Button } from '@mui/material';
 import dayjs from 'dayjs';
 import { AttemptService } from '../../api/services/AttemptService';
+import { LastAttempt } from './LastAttempt';
 export const Field = () => {
     const dispatch = useDispatch();
     const { stickers, slots, activeSticker, correctSequence, gameId, attempts, startTime, currentTime } = useSelector((state: RootState) => state.game);
@@ -91,15 +91,14 @@ export const Field = () => {
         }, 0);
         const newCurrentTime = dayjs();
 
-        const diffSeconds =  newCurrentTime.diff(currentTime || newCurrentTime, 'second');
+        const diffSeconds = newCurrentTime.diff(currentTime || newCurrentTime, 'second');
 
         // Formata o tempo corretamente para "HH:mm:ss"
         const attemptTime = dayjs("2020-0-01T00:00:00").add(diffSeconds, 'second').format('HH:mm:ss');
-        console.log(currentTime, newCurrentTime.format('MM-DD HH:mm:ss'))
         const newAttempts = [...attempts, { sequence: sequenceAttempt, correctCount, time: attemptTime }];
 
         const createBody = { gameId, sequenceAttempt, correctCount, attemptTime }
-       
+
         AttemptService.create(createBody)
             .then((resp) => {
                 if (resp) {
@@ -127,7 +126,9 @@ export const Field = () => {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <GameContainer>
+            <FieldContainer>
+                {/* Última tentativa */}
+             <LastAttempt />
                 {/* Área dos slots */}
                 <SlotsField>
                     {slots.map((slot: ISticker | null, index: number) => (
@@ -135,7 +136,7 @@ export const Field = () => {
                             {slot ? (
                                 <DraggableSticker sticker={slot} />
                             ) : (
-                                <span className="text-gray-400">Slot {index + 1}</span>
+                                <span className="text-gray-400 text-xs">{index + 1}</span>
                             )}
                         </DroppableSlot>
                     ))}
@@ -143,29 +144,27 @@ export const Field = () => {
 
                 {/* Renderização condicional */}
                 {!slots.every((slot: ISticker | null) => slot) ? (
-                    // Se todos os slots estiverem preenchidos, exibe a área de stickers disponíveis
+                    // Se não estiver todos preenchidos, exibe a área de stickers disponíveis
                     <AvailableField>
                         {stickers.map((sticker: ISticker) => (
                             <DraggableSticker key={sticker.id} sticker={sticker} />
                         ))}
                     </AvailableField>
                 ) : (
-                    // Se algum slot estiver vazio, exibe os botões de ação
-                    <div className="flex space-x-4 mt-8">
-                        <Button
-                            variant="contained"
-                            color="secondary"
+                    // Se todos os slots estiverem preenchidos, exibe os botões de ação
+                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                        <button
+                            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm transition-colors"
                             onClick={() => dispatch(resetAttempt())}
                         >
                             Limpar Slots
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="primary"
+                        </button>
+                        <button
+                            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-sm transition-colors"
                             onClick={handleSubmitAttempt}
                         >
                             Fazer Tentativa
-                        </Button>
+                        </button>
                     </div>
                 )}
 
@@ -173,7 +172,7 @@ export const Field = () => {
                 <DragOverlay>
                     <ActiveStickerOverlay activeSticker={activeSticker} />
                 </DragOverlay>
-            </GameContainer>
+            </FieldContainer>
         </DndContext>
     );
 };

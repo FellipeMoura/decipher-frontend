@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useEffect, useState } from "react";
-import { ISticker } from "../../types/Sticker";
+import { sortAttempts } from "../../shared/utils/gameUtils";
 
 export interface IAttemptsWithUrl {
     correctCount: number;
@@ -17,27 +17,15 @@ export const Attempts = () => {
 
     // Atualiza o array sortedAttempts sempre que avaliableStickers ou attempts mudarem
     useEffect(() => {
-        const updatedAttempts = attempts.map((attempt: IAttemptsWithUrl) => {
-            // Mapeia a sequência de IDs para os objetos completos de stickers
-            const stickersInSequence = attempt.sequence.map(id =>
-                avaliableStickers.find((sticker: ISticker) => sticker.id === id) // Encontra o sticker correspondente pelo ID
-            );
-
-            return { ...attempt, stickersInSequence }; // Inclui o array completo de stickers na tentativa
-        });
-
-        setSortedAttempts(updatedAttempts); // Atualiza o estado com as tentativas completas
+        setSortedAttempts(sortAttempts(attempts, avaliableStickers)); // Atualiza o estado com as tentativas completas
     }, [attempts, avaliableStickers]);
    // const getStickersFromSequence = (sequence: number[]): ISticker[] => {
     //    return sequence.map(id => sortedAttempts.find(sticker => sticker.id === id)!);
    // };
     return (
-        <div className="w-full max-w-4xl space-y-4 ">
-            <div className="grid gap-4 overflow-auto h-400">
+           <div className="w-full max-w-4xl space-y-4">
+            <div className="grid gap-4 overflow-auto max-h-[calc(100vh-300px)]" style={{ height: "calc(100vh - 300px)" }}>
                 {sortedAttempts.map((attempt: IAttemptsWithUrl, index: number) => {
-                    // Mapeia a sequência de IDs para objetos completos de stickers
-                    //const sequenceStickers = getStickersFromSequence(attempt.sequence);
-
                     return (
                         <div key={index} className="bg-gray-800 rounded-lg p-4 border border-gray-700 shadow-lg">
                             <div className="flex items-center justify-between">

@@ -1,0 +1,63 @@
+/* GameLayouts.css */
+
+/* Alturas personalizadas considerando a barra de navegação de 50px */
+.h-game-container {
+    height: calc(100vh - 55px);
+  }
+  
+  .h-game-content {
+    height: calc(100vh - 170px);
+  }
+  
+  .h-attempts-list {
+    height: calc(100vh - 250px);
+    scrollbar-width: thin;
+  }
+  
+  /* Estilizar a barra de rolagem para navegadores WebKit (Chrome, Safari) */
+  .h-attempts-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .h-attempts-list::-webkit-scrollbar-track {
+    background: rgba(75, 85, 99, 0.2);
+    border-radius: 10px;
+  }
+  
+  .h-attempts-list::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 10px;
+  }
+  
+  /* Animação para feedback visual ao arrastar */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  
+  .dragging {
+    animation: pulse 1s infinite;
+  }
+  
+  /* Melhorias para telas pequenas */
+  @media (max-width: 640px) {
+    .h-game-content {
+      height: calc(100vh - 150px);
+    }
+    
+    .h-attempts-list {
+      height: calc(100vh - 220px);
+    }
+  }
+  
+  /* Melhorias para telas muito pequenas */
+  @media (max-width: 360px) {
+    .h-game-container {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+    
+    .h-game-content {
+      padding: 8px;
+    }
+  }
